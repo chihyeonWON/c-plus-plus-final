@@ -82,7 +82,7 @@ public:
   ~Counter() { }
   int getValue() const { return value; } // 함수의 반환값이 const
   void setValue(int x) { value =x; }
-  Counter& operator++() // 자기가 자기 호출해서 매개변수 없음
+  Counter& operator++() // 자기가 자기 호출해서 매개변수 없음 & 써주는 이유 : 본객체를 ++ 증가
   {
     ++value; // 지역변수
     return *this; // 복사하기 위해서 생성된 임시 객체가 아니라 본객체를 넘겨주기위해서 // ++(++c) = ++(c.operator++()) = ++(c) 
@@ -116,6 +116,88 @@ const Counter operator++(int i) // int i 매개변수 넘어가는 것도 없고
 ++(v++) O
 ```
 
+## 대입 연산자 중복
 
+```c++
+#include <iostream>
+using namespace std;
+class Box
+{
+private:
+   double length, width, height;
+public:
+   Box(double l= 0.0, double w = 0.0, double h = 0.0) : length(l), width(w), height(h) { }
+   void display() {
+      cout << "(" << length << ", " << width << ", " << height << ")" << endl;
+   }
+   
+   Box& operator=(const Box& b2)
+   {
+      this->length = b2.length;
+      this->width = b2.width;
+      this->height = b2.height;
+      return this;
+   }
+};
+
+int main()
+{
+   Box b1(30.0, 30.0, 60.0), b2;
+   b1.display();
+   
+   b2 = b1; // b2.operator=(b1)
+   b2.display():;
+   
+   return 0;
+}
+
+대입 연산자는 참조자를 반환해야 한다.   
+그 이유는 대입 연산자는 연속하여 적용될 수 있기 때문이다.   
+대입 연산자와 복사 생성자는 많이 혼동되는 문제이다.   
+
+```c++
+MyArray first; // 기본 생성자 호출
+MyArray second(first); // 복사 생성자 호출
+MyArray third = first; // 복사 생성자 호출
+MyArray third {first}; // 복사 생성자 호출
+
+second = third; // 대입 연산자 호출
+```
+
+## 인덱스 연산자 [ ]의 중복
+
+```c++
+int A[10];
+A[-1] = 0; // 오류
+```
+
+인덱스 연산자의 중복 -> 인덱스의 범위를 체크
+
+```c++
+int &operator[] (int i) { // 형식이 아니라 인덱스 번호, &를 넣어주는 이유 : 자기 자신 객체 A[3] 이게 없으면 복사되서 
+   if(i >= SIZE) {
+      cout << "잘못된 인덱스: ";
+      return a[0];
+   }
+   else if(i < 0) // 0보다 작은 음수라면
+   {
+      cout << "잘못된 인덱스: ";
+      return a[0];
+   }
+   return a[i];
+}
+
+int main() {
+   MyArray A;
+   
+   A[3] = 9; // 인덱스 연산자 함수 호출 A[3].operator[](3) = 9; return a[3] = 9
+   cout << "A[3]=" << A[3] << endl;
+   cout << "A[16]=" << A[16] << endl;
+   
+   return 0;
+}
+```
+
+## 포인터 연산자의 중복
 
 
