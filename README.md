@@ -200,4 +200,167 @@ int main() {
 
 ## 포인터 연산자의 중복
 
+## 상속(inheritance)
+
+class Car
+{
+   int speed; // 속성값
+};
+
+class SportsCar: public Car
+{
+   bool turbo; // 속성값
+};
+
+SportsCar 클래스는 Car 클래스를 상속한다.
+
+Class Diagram (UML) 그림으로 표현   
+- : private member
++ : public member
+
+```c++
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Car {
+private:
+   int speed; // 속도
+public:
+   void setSpeed(int s) { speed = s; }
+   int getSpeed() { return speed; }
+};
+
+class SportsCar : public Car {
+private:
+   bool turbo;
+public:
+   void setTurbo(bool newValue) { turbo = newValue; }
+   bool getTurbo() { return turbo; }
+};
+
+int main()
+{
+   SportsCar c; // 부모클래스 메모리 먼저 잡히고, 자식클래스 메모리 잡힌다.
+   
+   c.setSpeed(60); // 부모클래스 Car 함수 호출
+   c.setTurbo(true); // 자기자신 자식클래스 함수 호출
+   c.setSpeed(100);
+   c.setTurbo(false);
+   return 0;
+}
+
+자식클래스는 부모클래스의 속성값을 사용할 수 있다. (public)
+
+상속은 왜 필요한가?   
+-> 공통되는 속성을 뽑아서 상위 클래스(부모 클래스)를 만드는 일반화(generalization)을 거친다.(상속개념)   
+<-> 반대로 공통된 클래스로 하위클래스(자식 클래스)를 만드는 것(specialization)   
+상속은 여러 단계로 이루어질 수 있다.   
+상속은 is-a kind of 관계이다.   
+ex) 자동차는 탈 것의 종류 중 한 개이다.(일반화)   
+has-a (composed of) ~로 구성되어 있다. (집합 관계)는 상속으로 모델링을 하면 안 된다.   
+library has a book.   
+
+parent=base=super class 상위      
+child=derived=sub class 하위   
+
+## 상속과 생성자/소멸자
+
+객체가 생성될 때 자식 클래스 생성자 뿐만 아니라 부모클래스의 생성자도 호출된다.   
+장유유서 개념 -> 부모 클래스 생성자 호출 먼저 되고 자식 클래스 생성자가 호출된다.   
+소멸될 때는 자식클래스가 먼저 소멸되고 그 다음 부모 클래스가 소멸된다.   
+
+```c++
+#include <iostream>
+#include <string>
+using namespace std;
+
+class Shape {
+private:
+   int x, y;
+public:
+   Shape() { cout << "SHAPE 생성자" << endl; }
+   ~Shape() { cout << "SHAPE 소멸자" << endl; }
+};
+
+class Rectangle : public Shape {
+private:
+   int width, height;
+public:
+   Rectangle() { cout << "RECTANGLE 생성자" << endl; }
+   ~Rectangle() { cout << "RECTANGLE 소멸자" << endl; }
+};
+
+int main()
+{
+   Rectangle r; // Rectangle 객체 r 생성
+   return 0; // 생성된 객체가 소멸되어야 한다.
+}
+
+```
+출력결과
+```c++
+SHAPE 생성자   
+RECTANGLE 생성자
+RECTANGLE 소멸자
+SHAPE 소멸자
+```
+
+## 부모 클래스의 생성자를 지정하는 방법
+
+부모 클래스의 생성자가 default 생성자, 매개변수 초기화하는 생성자 등 여러 개가 있을 수 있다.  
+이때 부모 클래스의 생성자를 지정할 수 있는 방법이 있다.   
+
+```c++
+자식 클래스의 생성자() : 부모클래스의 생성자()
+{
+}
+```
+예제
+```c++
+Rectangle (int x=0, int y=0, int w=0, int h=0) : Shape(x, y)
+{
+   width = w;
+   height = h;
+}
+뒤에 오는 부모클래스의 생성자는 값을 호출하는 형태로 지정해야 한다. Shape(int x, int y) X
+
+## 접근 지정자
+
+protected 지정자는 상속받는 클래스에서 사용한다.   
+외부에서는 사용x(전용멤버)이지만 자식 클래스는 protected 사용 가능
+
+부모 클래스에 protected를 지정해주면 자식 클래스에서만 사용 가능, 외부에서는 사용X
+
+## 멤버 함수 재정의
+
+polymophism 함수 다형성   
+
+1. 함수 중복정의(overloading)   
+2. 함수 재정의(overriding) 상속에서 사용   
+
+부모클래스의 정의되어 있는 함수를 자식클래스에 맞게끔 자식클래스에서 정의하는 것을 함수 재정의(overriding)이라고 한다.   
+
+같은 클래스 내에서 함수 정의 -> 중복정의   
+상속 관계 클래스에서 함수 정의 -> 재정의   
+
+## 부모클래스의 함수를 호출하고 싶다.
+
+```c++
+void print() { // print함수 재정의를 했지만
+   ParentClass::print(); 부모 클래스의 print를 호출하고 싶을 때 다음과 같이 사용한다.
+```   
+
+## 상속 받는 경우
+
+private로 상속 -> 부모클래스 속성 접근 x      
+public 로 상속 -> public으로 상속      
+protected로 상속 -> protected으로 상속      
+
+일반적으로 public으로 쓰지만 좀 더 수준이 높은 보안이 필요할 때는 protected를 사용한다.   
+상속 받을 때 접근 지정자를 줄 수 있다.
+```c++
+class Derived : private Base // public, protected 속성값들을 상속을 받지만 자식 클래스에서 private가 된다.
+```
+
 
