@@ -1,6 +1,161 @@
 # c-plus-plus-final
 c-plus-plus-final
 
+## 함수로 객체 전달하기
+
+객체의 주소를 매개변수로 하여 함수로 전달하면
+```c++
+void upgrade(Pizza *p) 
+{
+   p->setRadius(20);
+}
+
+int main()
+{
+   Pizza obj(10);
+   upgrade(&obj);
+```
+원본 객체의 내용을 조작할 수 있다.   
+이것은 장점이 되기도 하고 단점이 되기도 한다.   
+
+## 복사 생성자가 호출되는 경우
+
+```c++
+
+복사 생성자가 호출되는 경우는 크게 3가지이다.
+
+같은 종류의 객체로 초기화하는 경우
+MyClass obj(obj2); // 여기서 복사생성자가 호출된다.
+
+
+객체를 함수에 전달하는 경우
+MyClass func(MyClass obj) { // 여기서 복사생성자가 호출된다.
+
+}
+
+함수가 객체를 반환하는 경우
+MyClass func(MyClass obj) {
+   MyClass tmp;
+   
+   return tmp; // 이때 복사생성자가 호출된다.
+}
+
+복사 생성자가 필요한 경우
+
+class MyArray {
+public:
+   int size;
+   int* data; // data 클래스 멤버 변수를 동적할당 하기위해 int형 포인터로 선언해주었다.
+   
+   MyArray(int size)
+   {
+      this->size = size;
+      data = new int[size]; 
+   }
+   
+   ~MyArray()
+   {
+      if(data != NULL) delete[] this->data; // data는 동적배열이기 때문에 delete[] 형으로 소멸
+   }
+};
+
+int main()
+{
+   MyArray buffer(10);
+   buffer.data[0] = 1; 원본 클래스 멤버 배열의 0번째 자리에 1을 저장하였다.
+   {
+      MyArray clone = buffer; // 기본 복사 생성자가 호출된다. 원래 있던 buffer객체의 내용을 clone 객체를 생성하면서 복사
+   }
+   buffer.data[0] = 2; // buffer는 위에 { } 구문을 빠져나오면서 객체가 소멸한다. 따라서 런타임 오류가 뜬다.
+   
+   return 0;
+}
+
+위의 코드에서 문제점은 MyArray clone = buffer; 구문에서 clone 객체는 블록을 빠져나오면서 소멸하게 된다.
+그러면 buffer랑 clone이랑 같은 동적 메모리를 사용하고 있었을 텐데 clone이 소멸되면서 buffer는 메모리를 쓸 수가 없다.
+다시 말해서 buffer랑 clone이랑 같은 집에 살고 있었는데 clone이 집을 부동산에 내놓아버렸고
+buffer는 내놓은 집에 들어가서 살려고 buffer.data[0] = 2;를 하는 것과 같다.
+
+이렇게 동일한 공간을 복사해서 사용할 때 발생하는 문제가 얕은 복사(shallow copy)라고 한다.
+
+이 문제를 해결하기 위해서 깊은 복사(deep copy)로 기본 복사 생성자를 사용하지 않고 개발자가 직접 복사 생성자를 구현해주는 방법이 있다.
+
+다음의 코드를 살펴보자
+
+```c++
+MyClass func(MyClass obj) {
+   MyClass tmp;
+   
+   return tmp; // 이때 복사생성자가 호출된다.
+}
+
+복사 생성자가 필요한 경우
+
+class MyArray {
+public:
+   int size;
+   int* data; // data 클래스 멤버 변수를 동적할당 하기위해 int형 포인터로 선언해주었다.
+   
+   MyArray(int size)
+   {
+      this->size = size;
+      data = new int[size]; 
+   }
+   
+   MyArray(const& MyArray& other)
+   {
+      this->size = other.size; 
+      this->data = new int[other.size]; // 새로운 공간 할당
+      for(int i=0; i< size; i++) {
+         this->data[i] = other.data[i]; // 데이터 복사
+      }
+   }
+    
+   ~MyArray()
+   {
+      if(data != nullptr) delete[] this->data;
+      data = nullptr;
+   }
+};
+
+int main()
+{
+   MyArray buffer(10);
+   buffer.data[0] = 1; 원본 클래스 멤버 배열의 0번째 자리에 1을 저장하였다.
+   {
+      MyArray clone = buffer; // 기본 복사 생성자가 호출된다. 원래 있던 buffer객체의 내용을 clone 객체를 생성하면서 복사
+   }
+   buffer.data[0] = 2; // buffer는 위에 { } 구문을 빠져나오면서 객체가 소멸한다. 따라서 런타임 오류가 뜬다.
+   
+   return 0;
+}
+
+기본 복사 생성자와의 다른 부분 코드만 알아보자.
+개발자가 생성한 복사 생성자의 형태는 다음과 같다.
+MyArray(const& MyArray& other)
+   {
+      this->size = other.size; 
+      this->data = new int[other.size]; // 새로운 공간 할당
+      for(int i=0; i< size; i++){ 
+         this->data[i] = other.data[i]; // 데이터 복사
+      }
+   }
+새로운 메모리 공간을 할당해주는 모습을 볼 수 있다. 
+이렇게 되면 서로 각각 다른 메모리를 사용하기 때문에 오류는 발생하지 않는다.
+
+소멸할 때도
+   ~MyArray()
+   {
+      if(data != nullptr) delete[] this->data;
+      data = nullptr;
+   }
+nullptr로 멤버 data를 직접 초기화해줘야 한다.
+
+객체에 대하여 대입 연산자 = 을 사용할 수 있을까? 답은 가능하다.이다. 같은 타입의 객체끼리는 대입 연산이 가능하다.
+하지만 객체끼리 대입연산자나 인덱스 연산자, 포인터 연산자는 개발자가 연산자 중복을 사용하여 연산자를 마음대로 정의해서 사용할 수 있다.
+  
+```
+
 # 객체 연산자 
 
 ## + 연산자 중복 정의
