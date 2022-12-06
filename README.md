@@ -622,5 +622,141 @@ int main()
    return 0;
 }
 ```
+과제 담주까지 
+10장 431p 8, 433p 1, 2, 3, 4    
+11장 473p 8, 476p 3, 5   
 
+## 객체 포인터의 형변환
+
+```
+상향 형변환(upcasting): 자식 클래스 타입을 부모 클래스 타입으로 변환
+하향 형변환(downcasting) : 부모 클래스 타입을 자식 클래스 타입으로 변환
+
+형변환 (casting) 하는 이유? : 
+
+하향 형변환(downcasting)은 해서는 안된다. 하지만 upcasting 된거에다가 downcasting은 가능 -> 뒤에 나올 가상함수 
+
+상향 형변환 (객체 포인터 변수일 때)
+
+Animal *pa = new Dog(); // ok Animal 자식 클래스 객체 Dog를 new 생성해서 부모 클래스 포인터 객체 pa에 넣음 <- 상향
+컴파일러가 자동적으로 해줌
+
+상향 형변환을 하면 메모리가 줄어든다. 자식클래스 영역의 메모리를 잃어버린다. 상속할 때 부모클래스 메모리 + 자식클래스 메모리인데 상향 형변환하면 자식클래스 메모리 잃어버리고 부모클래스 메모리만 남는다. 왜냐하면 자식클래스는 부모클래스 메모리 영역을 포함하고 있기 때문이다.
+
+#include <iostream>
+using namespace std;
+
+class Animal
+{
+public:
+   void speak() { cout << "speak()" << endl; }
+};
+
+class Dog: public Animal
+{
+public:
+   void speak() { cout << "speak() 멍멍" << endl; } // speak 함수재정의 overriding
+};
+
+class Animal: public Animal
+{
+public:
+   void speak() { cout << "speak() 야옹" << endl; } // speak 함수재정의 overriding
+};
+
+int main()
+{
+   Animal *a1 = new Dog();
+   a1->speak(); // 자식클래스의 재정의된 함수가 나와야하는데 부모클래스의 멤버 함수가 호출된다.
    
+   Animal *a2 = new Cat();
+   a2->speak(); // 자식클래스의 재정의된 함수가 나와야하는데 부모클래스의 멤버 함수가 호출된다.
+   
+   return 0;
+}
+결과 -> 부모클래스의 speak()가 출력됨
+
+Downcasting은 명시적 형변환(캐스트 연산자) 
+자식 클래스 객체 = 부모 클래스 포인터 객체 -> 오류
+자식 클래스 객체 = (자식클래스) 부모 클래스 포인터 객체 // 명시적
+
+참조 가능한 영역이 확대된다. 사실은 access X
+
+가상 함수를 만드는 이유 -> overriding된 자식 클래스의 함수가 호출되게 하려고
+만드는 방법 부모클래스 함수에 virtual 가상함수 키워드를 붙인다.
+
+#include <iostream>
+using namespace std;
+
+class Animal
+{
+public:
+   virtual void speak() { cout << "speak()" << endl; }
+};
+
+
+class Dog: public Animal
+{
+public:
+   void speak() { cout << "speak() 멍멍" << endl; } // speak 함수재정의 overriding
+};
+
+class Animal: public Animal
+{
+public:
+   void speak() { cout << "speak() 야옹" << endl; } // speak 함수재정의 overriding
+};
+
+int main()
+{
+   Animal *a1 = new Dog();
+   a1->speak(); // 이미 부모클래스 함수가 호출될거라고 정의되어 있지만(정적 바인딩) virtual이 붙은 것을 보고 재정의된 자식클래스의 함수 호출
+   
+   Animal *a2 = new Cat();
+   a2->speak(); // 이미 부모클래스 함수가 호출될거라고 정의되어 있지만(정적 바인딩) virtual이 붙은 것을 보고 재정의된 자식클래스의 함수 호출
+   
+   return 0;
+}
+
+결과 -> 자식클래스의 멍멍, 야옹이 출력됌
+
+같은 종류의 작업은 같은 방법(Method)으로 구현되어야 하기 때문이다. 
+virtual 키워드가 없다면 부모클래스의 함수가 호출된다.
+
+바인딩(binding) : 실행되어야 할 프로그램의 주소가 정의되어 있는것. 운영체제 OS가 프로그램을 LOAD할 때 시작주소에 저장되어 있는 명렁어를 해독해서 실행
+정적 바인딩 (static binding) : 일반 함수가 실행할 때 주소가 결정된다. 컴파일할 때 미리 주소가 결정된다. 속도는 빠르지만 운영체제가 프로그램을 실행하는 데 불리하다.
+동적 바인딩 (dynamic binding) : virtual 가상 함수 실행할 때 주소가 결정된다. 속도가 느려짐. 주소가 최대한 늦게 결정될 수록 운영체제가 프로그램을 실행하는 데 유리하다.
+
+이 part에서는 virtual이 있으면 자식클래스의 재정의된 함수가 호출된다는 것만 기억하자.
+
+Shape *ps = new Rect(0, 0, 100, 100);
+ps->draw();
+
+delete ps; 부모클래스부분만 소멸된다. 자식클래스 부분은 남는다.. <- 가상소멸자를 만들어서 해결
+```
+
+## 가상 소멸자
+
+```
+다형성(upcasting)을 사용하는 과정에서 소멸자를 virtual로 만들어 주지 않으면 문제가 발생한다.
+부모클래스의 소멸자 함수를 가상함수로 만들어준다.
+가상소멸자를 쓰면 자식클래스 부분의 소멸자가 실행되어 소멸된다.
+소멸될 때 자식->부모 차례대로 그 다음에 부모클래스가 소멸된다.
+
+호출될 때 부모->자식 소멸될 때 자식->부모
+```
+
+## 순수 가상 함수
+
+```
+순수 가상 함수(pure virtual function) -> 추상클래스(abstract class)
+호출이 안되는 함수 <- 순수하게 가상 함수 역할
+정의 방법 (본체가 없음)
+
+부모클래스에 순수 가상 함수를 정의(body가 없다. {}가 없다.
+virtual void draw() = 0 // 순수 가상 함수 
+
+순수 가상 함수를 가지고 있는 클래스를 추상 클래스라고 함
+상속 전문 클래스(객체 생성 불가)
+추상클래스의 역할은 자식클래스한테 상속만 해주고 부모클래스로서 객체 생성이 불가능함
+```
