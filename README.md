@@ -589,4 +589,38 @@ protected로 상속 -> protected으로 상속
 class Derived : private Base // public, protected 속성값들을 상속을 받지만 자식 클래스에서 private가 된다.
 ```
 
+## 다중 상속 (multiple inheritance)
 
+```
+#include <iostream>
+using namespace std;
+
+class PassangerCar {
+private:
+   int seats;
+   void se_seats(int n) { seats = n; }
+};
+
+class Truck {
+public:
+   int payload;
+   void set_payload(int load) { payload = load; }
+};
+
+class Pickup : public PassangerCar, public Truck { // PassangerCar, Truck, Pickup 순으로 메모리가 잡힌다.
+public: 
+   int tow_capability;
+   void set_tow(int capa) { tow_capability = caps; }
+};
+
+int main()
+{
+   Pickup my_car;
+   my_car.set_seats(4);
+   my_car.set_payload(10000);
+   my_car.set_tow(30000);
+   return 0;
+}
+```
+
+   
