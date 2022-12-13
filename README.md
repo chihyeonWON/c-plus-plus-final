@@ -67,6 +67,13 @@ int getRadius() const { return radius; }
 함수로 객체를 하나 받아서(void setCheif(Student *p) { chief = p; }
 ```
 
+## 객체 포인터 생성하고 초기화
+```
+Rect* p = new Rect[2]; // 동적으로 객체 생성
+	p[0] = Rect(10, 20); // Rect 객체1
+	p[1] = Rect(10, 20); // Rect 객체2
+```
+
 ## 함수로 객체 전달하기
 
 객체의 주소를 매개변수로 하여 함수로 전달하면
