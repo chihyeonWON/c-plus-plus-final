@@ -55,6 +55,17 @@ int main()
 
 ```
 
+## const 포인터
+```
+멤버함수를 const로 정의하면 함수 안에서 멤버 변수를 변경하는 것이 금지된다.
+int getRadius() const { return radius; }
+```
+
+## 객체 포인터를 왜 사용하는 가?
+```
+멤버변수 쪽에 객체 포인터 멤버변수를 생성하고 Student* chief;
+함수로 객체를 하나 받아서(void setCheif(Student *p) { chief = p; }
+```
 
 ## 함수로 객체 전달하기
 
