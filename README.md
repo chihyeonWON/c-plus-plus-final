@@ -833,3 +833,92 @@ virtual void draw() = 0 // 순수 가상 함수
 상속 전문 클래스(객체 생성 불가)
 추상클래스의 역할은 자식클래스한테 상속만 해주고 부모클래스로서 객체 생성이 불가능함
 ```
+
+## 기말고사 외울 거 
+```
+객프 기말 시험 외울거
+
+반환형& 붙여야하는거 : ++, =, []
+함수 안에 객체 생성 : +, ++후위, 
+
+전위 연산자 ++
+Counter& operator ++()
+	{
+		++value;
+		return *this;
+	}
+
+후위 연산자 ++
+const Counter operator++(int i)
+{
+	Counter temp={*this}; // 현재의 상태를 저장한다.
+	++value;
+	return temp;
+}
+
++operator 
+Box operator+(const Box& b2)
+{
+	클래스 v;
+	v.x = x + b2.x;
+	v.y = y + b2.y;
+	rerturn v
+}
+
+=operator
+반환형 &붙여야함
+Box& operator=(const Box& b2)
+{
+	length = b2.length;
+	width = b2.width;
+	height = b2.height;
+	return *this;
+}
+
+프렌드 함수 선언은 클래스 안에 정의는 클래스 밖에
+
+friend void printBox(Box box);
+
+void printBox(Box box) {
+	box.length, box.width, box.height　＜- 다른 객체 private 멤,변에접근가능
+}
+
+
+ostream, istream
+
+<< 연산자 중복 정의
+friend ostream& operator<<(ostream& os, const MyVector& v)
+{
+	os << “(” << v.x <<　"," << v.y << ")" << endl;
+
+>> 연산자 중복 정의 (두번째 const 없음) 
+friend istream& operator>>(istream& in, MyVector& v) 
+
+상속과 생성자/소멸자
+
+객체가 생성될 때는 부모 먼저 
+소멸될 때는 자식 먼저
+
+상향 형변환
+
+부모* p = new 자식(); 
+virtual 소멸자 만들어줘서 자식 소멸자 호출되도록 함
+
+예외 처리
+try {
+	if(persons == 0)
+		throw persons;
+｝ catch (int e) { // int는 persons의 자료형
+	cout << endl;
+}
+
+함수 템플릿
+template <typename T>
+void swap_values(T& x, T& y)
+{
+	T temp;
+	temp = x;
+	x = y;
+	y = temp;
+}
+```
